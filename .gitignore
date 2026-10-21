@@ -1,0 +1,45 @@
+
+# Python: archivos temporales y compilados
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# Variables de entorno y credenciales
+.env
+.env.*
+!.env.example
+
+# Registros y archivos temporales
+*.log
+*.tmp
+*.bak
+
+# Pruebas y caché
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editores e IDE
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Dependencias JavaScript, si se llegaran a instalar
+node_modules/
+
+# Bases de datos locales y datos de ejecución
+instance/
+*.sqlite
+*.sqlite3

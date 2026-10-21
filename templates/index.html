@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SMS Shield SIS120 - Detector de Mensajes Sospechosos con Expresiones Regulares</title>
+    <!-- Google Fonts for modern mobile typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="theme-dark">
+
+    <!-- BARRA SUPERIOR EXTERNA (PARA EL ENTORNO DE ESCRITORIO / EXPOSICIÓN) -->
+    <aside class="desktop-banner" id="desktopBanner">
+        <div class="banner-left">
+            <span class="badge-academic">SIS120 • Lenguajes Formales y Autómatas</span>
+            <span class="banner-subtitle">Simulador Móvil de Detección de Mensajes con Expresiones Regulares (Python)</span>
+        </div>
+        <div class="banner-controls">
+            <button id="toggleFrameBtn" class="banner-btn" title="Alternar entre vista de teléfono y pantalla ancha">
+                <span class="btn-icon">📱</span>
+                <span id="frameToggleText">Vista Completa</span>
+            </button>
+            <button id="quickHelpBtn" class="banner-btn" title="Información del proyecto y teoría">
+                <span class="btn-icon">ℹ️</span>
+                <span>Guía Didáctica</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTENEDOR PRINCIPAL: SIMULADOR DE CELULAR -->
+    <main class="device-wrapper">
+        <div class="smartphone-frame" id="smartphoneFrame">
+
+            <!-- ISLA DINÁMICA / NOTCH -->
+            <div class="phone-notch">
+                <div class="camera-lens"></div>
+                <div class="speaker-grill"></div>
+            </div>
+
+            <!-- BARRA DE ESTADO DEL CELULAR (STATUS BAR) -->
+            <header class="phone-status-bar">
+                <span class="status-time" id="statusClock">12:00</span>
+                <div class="status-icons">
+                    <span class="status-icon" title="Señal">📶</span>
+                    <span class="status-icon" title="Wi-Fi">🛜</span>
+                    <span class="status-icon" title="Batería 98%">🔋 98%</span>
+                </div>
+            </header>
+
+            <!-- ENCABEZADO DE LA APLICACIÓN -->
+            <section class="app-header">
+                <div class="app-brand">
+                    <div class="app-logo-pulse">
+                        <span class="shield-icon">🛡️</span>
+                    </div>
+                    <div>
+                        <h1 class="app-title">SMS Shield</h1>
+                        <span class="app-version">v1.2 • SIS120 USFX</span>
+                    </div>
+                </div>
+                <div class="security-status-pill" id="securityStatusBadge">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Protección Activa</span>
+                </div>
+            </section>
+
+            <!-- CONTENEDOR DE PANTALLAS (VISTAS) -->
+            <div class="phone-screen-content">
+
+                <!-- ========================================================= -->
+                <!-- PANTALLA 1: BANDEJA DE ENTRADA SIMULADA                   -->
+                <!-- ========================================================= -->
+                <section class="screen-view active" id="viewInbox" role="tabpanel">
+                    <div class="screen-header-row">
+                        <div>
+                            <h2 class="section-title">Bandeja de Entrada</h2>
+                            <p class="section-subtitle">Mensajes simulados para demostración académica</p>
+                        </div>
+                        <button id="btnSimulateArrival" class="action-btn-secondary" title="Simula la llegada de un nuevo mensaje SMS">
+                            <span class="btn-icon">⚡</span>
+                            <span>Simular llegada</span>
+                        </button>
+                    </div>
+
+                    <!-- BANNER INFORMATIVO BANDEJA -->
+                    <div class="hint-card">
+                        <span class="hint-icon">💡</span>
+                        <div class="hint-text">
+                            Selecciona cualquier mensaje para abrirlo y ejecutar el análisis sintáctico con Python.
+                        </div>
+                    </div>
+
+                    <!-- LISTA DE MENSAJES -->
+                    <div class="messages-list" id="inboxMessagesList">
+                        <!-- Se puebla dinámicamente con JavaScript desde /api/mock-messages -->
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- PANTALLA 2: ANALIZADOR DE MENSAJES                        -->
+                <!-- ========================================================= -->
+                <section class="screen-view" id="viewAnalyze" role="tabpanel">
+                    <div class="screen-header-row">
+                        <div>
+                            <h2 class="section-title">Analizador de Mensajes</h2>
+                            <p class="section-subtitle">Motor de evaluación sintáctica con Python <code class="code-inline">re</code></p>
+                        </div>
+                        <button id="btnClearInput" class="btn-subtle" title="Limpiar texto">
+                            <span>🗑️ Limpiar</span>
+                        </button>
+                    </div>
+
+                    <!-- CASOS DE PRUEBA RÁPIDOS PARA EXPOSICIÓN -->
+                    <div class="presets-section">
+                        <span class="presets-label">Casos de prueba para exposición:</span>
+                        <div class="presets-chips">
+                            <button class="chip-btn" data-preset="1" title="Mensaje sospechoso con múltiples indicadores">🚨 Caso 1: Sospechoso</button>
+                            <button class="chip-btn" data-preset="2" title="Tarjeta de crédito cancelada con número de contacto">💳 Caso 2: Tarjeta cancelada</button>
+                            <button class="chip-btn" data-preset="3" title="Amenaza de bloqueo y verificación inmediata">🛑 Caso 3: Amenaza bloqueo</button>
+                            <button class="chip-btn" data-preset="4" title="Tarjeta cancelada en contexto cotidiano">📅 Caso 4: Tarjeta cotidiana</button>
+                            <button class="chip-btn" data-preset="5" title="Mensaje normal sin indicadores">✅ Caso 5: Normal universidad</button>
+                            <button class="chip-btn" data-preset="6" title="Mensaje bancario crítico">🏦 Caso 6: Bancario crítico</button>
+                        </div>
+                    </div>
+
+                    <!-- ÁREA DE TEXTO -->
+                    <div class="input-card">
+                        <label for="customMessageInput" class="input-label">Texto del mensaje a examinar:</label>
+                        <textarea 
+                            id="customMessageInput" 
+                            class="custom-textarea" 
+                            placeholder="Escribe o pega aquí el contenido del mensaje sospechoso..."
+                            rows="4"
+                            maxlength="2000"></textarea>
+                        <div class="input-footer">
+                            <span class="char-counter" id="charCounter">0 / 2000 caracteres</span>
+                            <span class="py-badge">🐍 Motor Python</span>
+                        </div>
+                    </div>
+
+                    <!-- BOTÓN DE ACCIÓN PRINCIPAL -->
+                    <button id="btnRunAnalysis" class="btn-primary-action">
+                        <span class="btn-spinner" id="analysisSpinner" style="display: none;"></span>
+                        <span class="btn-icon" id="analysisIcon">🔍</span>
+                        <span id="analysisBtnText">Analizar mensaje con Python</span>
+                    </button>
+
+                    <!-- CONTENEDOR DE RESULTADOS DEL ANÁLISIS -->
+                    <div class="analysis-results-container" id="analysisResultsContainer" style="display: none;">
+                        
+                        <!-- TARJETA DE CLASIFICACIÓN ORIENTATIVA -->
+                        <div class="classification-card" id="classificationCard">
+                            <div class="classification-header">
+                                <div class="classification-icon" id="classificationIcon">🛡️</div>
+                                <div class="classification-meta">
+                                    <span class="classification-tag" id="classificationBadge">Clasificación</span>
+                                    <h3 class="classification-title" id="classificationTitle">Sin evaluar</h3>
+                                </div>
+                            </div>
+                            <div class="classification-stats">
+                                <div class="stat-box">
+                                    <span class="stat-number" id="statCategoriesCount">0</span>
+                                    <span class="stat-label">Categorías distintas</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-number" id="statTotalMatches">0</span>
+                                    <span class="stat-label">Coincidencias exactas</span>
+                                </div>
+                            </div>
+                            <div class="recommendation-box" id="recommendationBox">
+                                <span class="recommendation-icon">💡</span>
+                                <p class="recommendation-text" id="recommendationText"></p>
+                            </div>
+                            <div class="academic-note" id="academicNote"></div>
+                        </div>
+
+                        <!-- VISUALIZACIÓN DEL TEXTO CON RESALTADO SEGURO -->
+                        <div class="result-card">
+                            <div class="card-title-row">
+                                <h4 class="card-title">Texto Analizado (Coincidencias Resaltadas)</h4>
+                                <span class="safe-badge">HTML Seguro</span>
+                            </div>
+                            <div class="highlighted-text-box" id="highlightedTextBox"></div>
+                            <p class="highlight-caption">Pasa el cursor o pulsa sobre un fragmento resaltado para ver el patrón reconocido.</p>
+                        </div>
+
+                        <!-- DETALLE DE COINCIDENCIAS Y PATRONES ACTIVADOS -->
+                        <div class="result-card">
+                            <h4 class="card-title">Detalle de Coincidencias en Python</h4>
+                            <div class="matches-list" id="detectedMatchesList">
+                                <!-- Se puebla dinámicamente -->
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- PANTALLA 3: LABORATORIO REGEX (DIDÁCTICA SIS120)          -->
+                <!-- ========================================================= -->
+                <section class="screen-view" id="viewLab" role="tabpanel">
+                    <div class="screen-header-row">
+                        <div>
+                            <h2 class="section-title">Laboratorio Regex</h2>
+                            <p class="section-subtitle">Estudio de Operadores y Autómatas (SIS120)</p>
+                        </div>
+                    </div>
+
+                    <!-- NOTA TEÓRICA DE LENGUAJES FORMALES -->
+                    <div class="theory-card">
+                        <div class="theory-header">
+                            <span class="theory-icon">📚</span>
+                            <span class="theory-title">Fundamento Teórico SIS120</span>
+                        </div>
+                        <p class="theory-body">
+                            En la jerarquía de Chomsky, las <strong>expresiones regulares</strong> definen la familia de los <strong>Lenguajes Regulares (Tipo 3)</strong>. Por el Teorema de Kleene, cada expresión regular puede traducirse a un <strong>Autómata Finito Determinista (AFD)</strong> o No Determinista (AFND) equivalente que acepta exactamente las cadenas reconocidas por el patrón.
+                        </p>
+                    </div>
+
+                    <!-- SELECTOR DE PATRÓN -->
+                    <div class="lab-selector-card">
+                        <label for="patternSelect" class="input-label">Selecciona el patrón a estudiar:</label>
+                        <select id="patternSelect" class="custom-select">
+                            <option value="urgencia">Patrón 1: Lenguaje de urgencia y presión para actuar</option>
+                            <option value="dinero">Patrón 2: Cantidades monetarias (Bolivianos / Bs)</option>
+                            <option value="solicitud_datos">Patrón 3: Verificación o actualización de cuentas y datos</option>
+                            <option value="enlaces">Patrón 4: Enlaces web</option>
+                            <option value="exclamacion">Patrón 5: Exceso de signos de exclamación</option>
+                            <option value="cuenta_bloqueada">Patrón 6: Cuentas/Tarjetas comprometidas (canceladas, etc.)</option>
+                            <option value="amenaza_bloqueo">Patrón 7: Amenazas de bloqueo o pérdida de acceso</option>
+                            <option value="actividad_inusual">Patrón 8: Actividad inusual / sospechosa</option>
+                            <option value="info_financiera">Patrón 9: Información financiera y personal sensible</option>
+                            <option value="correo_electronico">Patrón 10: Direcciones de correo electrónico (Informativo)</option>
+                        </select>
+                    </div>
+
+                    <!-- DETALLE DEL PATRÓN ACTIVO -->
+                    <div class="pattern-detail-card" id="patternDetailCard">
+                        <div class="pattern-header">
+                            <span class="pattern-badge" id="labPatternCategory">Categoría</span>
+                            <h3 class="pattern-title" id="labPatternName">Nombre del patrón</h3>
+                        </div>
+                        <div class="code-box">
+                            <code class="regex-code" id="labPatternRegex">r'...'</code>
+                            <button id="btnCopyRegex" class="btn-copy" title="Copiar expresión regular">📋</button>
+                        </div>
+                        <p class="pattern-flags" id="labPatternFlags">Flags: re.IGNORECASE</p>
+                        <p class="pattern-description" id="labPatternExplanation"></p>
+
+                        <!-- DESGLOSE DE OPERADORES REGEX -->
+                        <div class="operators-breakdown">
+                            <h4 class="breakdown-title">Significado de los operadores utilizados:</h4>
+                            <div class="operators-table" id="labOperatorsTable">
+                                <!-- Inyectado dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ÁREA INTERACTIVA DE PRUEBA -->
+                    <div class="lab-test-card">
+                        <h4 class="card-title">Prueba interactiva en vivo con Python</h4>
+                        <div class="test-samples-row">
+                            <button id="btnSampleMatch" class="chip-sample chip-match" title="Cargar cadena que sí coincide">
+                                🟢 Probar ejemplo que COINCIDE
+                            </button>
+                            <button id="btnSampleNoMatch" class="chip-sample chip-nomatch" title="Cargar cadena que no coincide">
+                                🔴 Probar ejemplo que NO COINCIDE
+                            </button>
+                        </div>
+                        <div class="test-input-group">
+                            <label for="labTestInput" class="input-label">Cadena de prueba:</label>
+                            <input type="text" id="labTestInput" class="custom-input" placeholder="Escribe aquí una frase para probar el patrón...">
+                        </div>
+                        <button id="btnRunLabTest" class="btn-secondary-action">
+                            <span>⚡ Ejecutar en Python (re.finditer)</span>
+                        </button>
+
+                        <!-- RESULTADO DEL LABORATORIO -->
+                        <div class="lab-result-box" id="labResultBox" style="display: none;">
+                            <div class="lab-result-status" id="labResultStatus"></div>
+                            <div class="lab-result-content" id="labResultContent"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- PANTALLA 4: HISTORIAL DE SESIÓN                           -->
+                <!-- ========================================================= -->
+                <section class="screen-view" id="viewHistory" role="tabpanel">
+                    <div class="screen-header-row">
+                        <div>
+                            <h2 class="section-title">Historial de Análisis</h2>
+                            <p class="section-subtitle">Mensajes analizados durante esta sesión</p>
+                        </div>
+                        <button id="btnClearHistory" class="btn-subtle" title="Borrar historial local">
+                            <span>🗑️ Vaciar</span>
+                        </button>
+                    </div>
+
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">
+                            <span class="empty-icon">📭</span>
+                            <p class="empty-text">Aún no has analizado mensajes en esta sesión.</p>
+                            <p class="empty-subtext">Analiza un mensaje desde la bandeja o la pestaña de análisis para guardarlo aquí.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- BARRA DE NAVEGACIÓN INFERIOR (BOTTOM TAB BAR) -->
+            <nav class="phone-bottom-nav">
+                <button class="nav-tab active" data-target="viewInbox" title="Bandeja de mensajes">
+                    <span class="tab-icon">📥</span>
+                    <span class="tab-label">Bandeja</span>
+                    <span class="unread-dot" id="inboxUnreadDot" style="display: none;"></span>
+                </button>
+                <button class="nav-tab" data-target="viewAnalyze" title="Analizador sintáctico">
+                    <span class="tab-icon">🔍</span>
+                    <span class="tab-label">Analizar</span>
+                </button>
+                <button class="nav-tab" data-target="viewLab" title="Laboratorio de expresiones regulares">
+                    <span class="tab-icon">🧪</span>
+                    <span class="tab-label">Laboratorio</span>
+                </button>
+                <button class="nav-tab" data-target="viewHistory" title="Historial de mensajes examinados">
+                    <span class="tab-icon">📜</span>
+                    <span class="tab-label">Historial</span>
+                </button>
+            </nav>
+
+            <!-- BARRA INFERIOR DE INICIO DE SMARTPHONE -->
+            <div class="phone-home-indicator"></div>
+
+        </div>
+    </main>
+
+    <!-- MODAL: DETALLE DEL MENSAJE DE LA BANDEJA -->
+    <div class="modal-backdrop" id="messageModal" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-sender-info">
+                    <div class="avatar-circle" id="modalSenderAvatar">--</div>
+                    <div>
+                        <h4 class="modal-sender-name" id="modalSenderName">Remitente</h4>
+                        <span class="modal-time" id="modalTime">12:00</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" id="modalCloseBtn" title="Cerrar">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message-text" id="modalMessageText"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-subtle" id="modalCancelBtn">Cerrar</button>
+                <button class="btn-primary-action" id="modalAnalyzeBtn">
+                    <span class="btn-icon">🔍</span>
+                    <span>Analizar este mensaje con Python</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GUÍA ACADÉMICA / AYUDA -->
+    <div class="modal-backdrop" id="guideModal" style="display: none;">
+        <div class="modal-dialog modal-large">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">Guía de Exposición - SIS120</h3>
+                    <p class="modal-subtitle">Lenguajes Formales y Autómatas • USFX</p>
+                </div>
+                <button class="modal-close-btn" id="guideCloseBtn" title="Cerrar">✕</button>
+            </div>
+            <div class="modal-body academic-guide-body">
+                <h4>🎯 Objetivo de la Demostración</h4>
+                <p>
+                    Demostrar la aplicación práctica de la <strong>teoría de lenguajes regulares</strong> en la detección sintáctica de patrones sospechosos dentro de mensajes de texto, utilizando el motor real <code class="code-inline">re</code> de Python en un entorno visual simulador de teléfono inteligente.
+                </p>
+
+                <h4>⚙️ Los 10 Patrones Lingüísticos Implementados</h4>
+                <ol class="guide-patterns-list">
+                    <li><strong>Urgencia y presión:</strong> <code class="code-inline">\b(?:urgente|inmediatamente|hoy|de inmediato|cuanto antes...)\b</code></li>
+                    <li><strong>Cantidades monetarias:</strong> <code class="code-inline">\b(?:(?:Bs\.?|BOB)\s*[0-9]+...|[0-9]+...bolivianos?)\b</code></li>
+                    <li><strong>Verificación de cuentas/datos:</strong> <code class="code-inline">\b(?:(?:confirma|verifica|actualiza|valida)...(?:cuenta|datos...))\b</code></li>
+                    <li><strong>Enlaces web:</strong> <code class="code-inline">https?://\S+|www\.\S+</code></li>
+                    <li><strong>Exceso de exclamaciones:</strong> <code class="code-inline">!{2,}|¡{2,}</code></li>
+                    <li><strong>Cuentas/Tarjetas comprometidas:</strong> <code class="code-inline">\b(?:(?:cuenta|tarjeta)...(?:cancelada|bloqueada|cerrada...))\b</code></li>
+                    <li><strong>Amenazas de bloqueo:</strong> <code class="code-inline">\b(?:(?:cuenta|tarjeta)...será bloqueada|perderá el acceso...)\b</code></li>
+                    <li><strong>Actividad inusual:</strong> <code class="code-inline">\b(?:actividad inusual|acceso sospechoso|no autorizado)\b</code></li>
+                    <li><strong>Datos financieros y personales:</strong> <code class="code-inline">\b(?:número de tarjeta|vencimiento|CVV|seguro social|clave...)\b</code></li>
+                    <li><strong>Correo electrónico (Informativo):</strong> <code class="code-inline">\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b</code></li>
+                </ol>
+
+                <h4>📐 Regla de Clasificación Orientativa</h4>
+                <ul>
+                    <li><strong class="text-safe">0 categorías:</strong> «Sin indicadores detectados»</li>
+                    <li><strong class="text-warning">1 categoría:</strong> «Revisar con precaución»</li>
+                    <li><strong class="text-danger">2 o más categorías:</strong> «Mensaje sospechoso»</li>
+                </ul>
+                <p class="guide-note">
+                    * La regla evalúa categorías distintas, no la mera repetición de una misma categoría.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary-action" id="guideOkBtn">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
